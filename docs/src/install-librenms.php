@@ -93,7 +93,7 @@
             <p>To use the editor, you need to make a few more changes. </p>
 
             <p>To learn more about actually <i>using</i> the Cacti plugin, see the
-            <a href = "cacti-plugin.html">Cacti Plugin page</a>.</p>
+            <a href = "librenms-plugin.html">Cacti Plugin page</a>.</p>
 
 <?php
         include "common-page-foot.php";

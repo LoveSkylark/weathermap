@@ -24,9 +24,9 @@ config-reference.php: reference.xsl index.xml contents.xml $(GLOBALS) $(LINKS) $
 	php errorcodes.php | ./relink-reference.pl ALL > ../pages/errorcodes.html
 	php index.php > ../index.html
 	php cli-reference.php > ../pages/cli-reference.html
-	php cacti-plugin.php > ../pages/cacti-plugin.html
-	php install-cacti.php > ../pages/install-cacti.html
-	php install-cacti-editor.php > ../pages/install-cacti-editor.html
+	php librenms-plugin.php > ../pages/librenms-plugin.html
+	php install-librenms.php > ../pages/install-librenms.html
+	php install-librenms-editor.php > ../pages/install-librenms-editor.html
 	php install-cli.php > ../pages/install-cli.html
 	php install-cli-editor.php > ../pages/install-cli-editor.html
 	php upgrading.php > ../pages/upgrading.html

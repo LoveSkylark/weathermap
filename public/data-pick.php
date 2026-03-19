@@ -2,8 +2,7 @@
 
 // ******************************************
 // sensible defaults
-include 'config.inc.php';
-$whats_installed = '';
+include dirname(__DIR__) . '/config.php';
 
 
 $weathermap_config = array (
@@ -27,33 +26,32 @@ $valid_show_interfaces = array (
 	'0'    => 0,
 );
 
-	/*
-	 * Include the LibreNMS config, so we know about the database.
-	 *
-	 * Include config first to get install dir, then load defaults and config
-	 * again to get full set of config values.
-	 */
-	/* Load Weathermap config defaults, see file for description. */
+	// Bootstrap Laravel and verify authentication.
+	require_once $librenms_base . '/vendor/autoload.php';
+	$app    = require $librenms_base . '/bootstrap/app.php';
+	$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+	$kernel->handle(\Illuminate\Http\Request::capture());
 
-    $init_modules = ['web', 'auth'];
-    require $librenms_base . '/includes/init.php';
-
-	if (!Auth::check()) {
-		header('Location: /');
+	if (! $app->make('auth')->guard()->check()) {
+		header('Location: /login');
 		exit;
 	}
 
-	chdir($librenms_base . '/plugins/Weathermap');
-	$librenms_found = true;
+	chdir(realpath(__DIR__ . '/..'));
 
-	/* Validate configuration, see defaults.inc.php for explaination */
-	if (in_array ($config['plugins']['Weathermap']['sort_if_by'], $valid_sort_if_by))
-		$weathermap_config['sort_if_by'] = $config['plugins']['Weathermap']['sort_if_by'];
+	// Read plugin settings via LibreNMS config (set in config/config.php or via the UI).
+	$sort_if_by      = \LibreNMS\Config::get('plugins.Weathermap.sort_if_by', 'ifAlias');
+	$show_interfaces = \LibreNMS\Config::get('plugins.Weathermap.show_interfaces', 'all');
 
-	if (in_array ($config['plugins']['Weathermap']['show_interfaces'], $valid_show_interfaces))
-		$weathermap_config['show_interfaces'] = $valid_show_interfaces[$config['plugins']['Weathermap']['show_interfaces']];
-	elseif (validate_device_id ($config['plugins']['Weathermap']['show_interfaces']))
-		$weathermap_config['show_interfaces'] = $config['plugins']['Weathermap']['show_interfaces'];
+	if (in_array($sort_if_by, $valid_sort_if_by)) {
+		$weathermap_config['sort_if_by'] = $sort_if_by;
+	}
+
+	if (array_key_exists($show_interfaces, $valid_show_interfaces)) {
+		$weathermap_config['show_interfaces'] = $valid_show_interfaces[$show_interfaces];
+	} elseif (ctype_digit((string) $show_interfaces) && (int) $show_interfaces > 0) {
+		$weathermap_config['show_interfaces'] = (int) $show_interfaces;
+	}
 
 
 // ******************************************
@@ -81,7 +79,7 @@ if(isset($_REQUEST['command']) && $_REQUEST["command"]=='link_step2')
 	{
 		var graph_url, hover_url;
 
-		var base_url = '<?php echo isset($config['base_url'])?$config['base_url']:''; ?>';
+		var base_url = '<?php echo rtrim(url('/'), '/') . '/'; ?>';
 
 		if (typeof window.opener == "object") {
 
@@ -113,7 +111,7 @@ if(isset($_REQUEST['command']) && $_REQUEST["command"]=='link_step1')
 ?>
 <html>
 <head>
-	<script type="text/javascript" src="vendor/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript" src="/vendor/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript">
 
 	function filterlist(previous)
@@ -313,7 +311,6 @@ if($hosts->isNotEmpty()) {
 	/*
 	 * Query interfaces (if we should)...
 	 */
-	$result = Null;
 	if ($host_id != 0) {
 	    $devices = \App\Models\Device::when($host_id > 0, function ($query) use ($host_id) {
 	        $query->where('device_id', $host_id);
@@ -374,7 +371,7 @@ if(isset($_REQUEST['command']) && $_REQUEST["command"]=='node_step1')
 ?>
 <html>
 <head>
-<script type="text/javascript" src="vendor/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="/vendor/jquery/dist/jquery.min.js"></script>
 <script type="text/javascript">
 
 	function filterlist(previous)
@@ -433,7 +430,7 @@ if(isset($_REQUEST['command']) && $_REQUEST["command"]=='node_step1')
 		// This is the section that sets the Node Properties
 		var graph_url, hover_url;
 
-		var base_url = '<?php echo isset($config['base_url'])?$config['base_url']:''; ?>';
+		var base_url = '<?php echo rtrim(url('/'), '/') . '/'; ?>';
 
 		if (typeof window.opener == "object") {
 

@@ -1,4 +1,9 @@
 <?php
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
+
 // Pluggable datasource for PHP Weathermap 0.9
 // - return a live SNMP value
 
@@ -13,7 +18,7 @@
 // TARGET snmp:public:hostname:1.3.6.1.4.1.3711.1.1:1.3.6.1.4.1.3711.1.2
 // (that is, TARGET snmp:community:host:in_oid:out_oid
 
-class WeatherMapDataSource_snmp extends WeatherMapDataSource {
+class Snmp extends DataSource {
     var $down_cache;
 
 	function Init(&$map)
@@ -46,8 +51,12 @@ class WeatherMapDataSource_snmp extends WeatherMapDataSource {
 		$data[OUT] = NULL;
 		$data_time = 0;
 
-		$timeout = 1000000;
-		$retries = 2;
+		$timeout = class_exists('\LibreNMS\Config')
+			? \LibreNMS\Config::get('snmp.timeout', 1) * 1000000
+			: 1000000;
+		$retries = class_exists('\LibreNMS\Config')
+			? \LibreNMS\Config::get('snmp.retries', 2)
+			: 2;
 		$abort_count = 0;
 		
 		$in_result = NULL;
@@ -151,5 +160,3 @@ class WeatherMapDataSource_snmp extends WeatherMapDataSource {
 		return( array($data[IN], $data[OUT], $data_time) );
 	}
 }
-
-// vim:ts=4:sw=4:

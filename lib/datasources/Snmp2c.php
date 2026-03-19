@@ -1,6 +1,8 @@
 <?php
-// Pluggable datasource for PHP Weathermap 0.9
-// - return a live SNMP value
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
 
 // doesn't work well with large values like interface counters (I think this is a rounding problem)
 // - also it doesn't calculate rates. Just fetches a value.
@@ -13,7 +15,7 @@
 // TARGET snmp2c:public:hostname:1.3.6.1.4.1.3711.1.1:1.3.6.1.4.1.3711.1.2
 // (that is, TARGET snmp:community:host:in_oid:out_oid
 
-class WeatherMapDataSource_snmp2c extends WeatherMapDataSource
+class Snmp2c extends DataSource
 {
     var $down_cache;
 
@@ -49,8 +51,12 @@ class WeatherMapDataSource_snmp2c extends WeatherMapDataSource
         $in_result = null;
         $out_result = null;
 
-        $timeout = 1000000;
-        $retries = 2;
+        $timeout = class_exists('\LibreNMS\Config')
+            ? \LibreNMS\Config::get('snmp.timeout', 1) * 1000000
+            : 1000000;
+        $retries = class_exists('\LibreNMS\Config')
+            ? \LibreNMS\Config::get('snmp.retries', 2)
+            : 2;
         $abort_count = 0;
 
         if ($map->get_hint("snmp_timeout") != '') {
@@ -134,5 +140,3 @@ class WeatherMapDataSource_snmp2c extends WeatherMapDataSource
         return (array($data[IN], $data[OUT], $data_time));
     }
 }
-
-// vim:ts=4:sw=4:

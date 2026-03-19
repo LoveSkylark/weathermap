@@ -93,7 +93,7 @@ the extra permissions that should appear there now, to either View Weathermaps (
             <p>To use the editor, you need to make a few more changes (see below). </p>
 
             <p>To learn more about actually <i>using</i> the Cacti plugin, see the
-            <a href = "cacti-plugin.html">Cacti Plugin page</a>.</p>
+            <a href = "librenms-plugin.html">Cacti Plugin page</a>.</p>
 
             <h4>The Editor</h4>
 

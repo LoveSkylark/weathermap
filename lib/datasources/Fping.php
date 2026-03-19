@@ -1,11 +1,14 @@
 <?php
-// Pluggable datasource for PHP Weathermap 0.9
-// - return a live ping result
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
+
 
 // TARGET fping:ipaddress
 // TARGET fping:hostname
 
-class WeatherMapDataSource_fping extends WeatherMapDataSource {
+class Fping extends DataSource {
     var $fping_cmd;
 
 	var $addresscache = array();
@@ -14,11 +17,10 @@ class WeatherMapDataSource_fping extends WeatherMapDataSource {
 
 	function Init(&$map)
 	{
-		# 
-		# You may need to change the line below to have something like "/usr/local/bin/fping" or "/usr/bin/fping" instead.
-		#
-		$this->fping_cmd = "/usr/sbin/fping";
-	
+		$this->fping_cmd = class_exists('\LibreNMS\Config')
+			? \LibreNMS\Config::get('fping', '/usr/sbin/fping')
+			: '/usr/sbin/fping';
+
 		return(TRUE);
 	}
 

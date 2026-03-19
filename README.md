@@ -1,47 +1,73 @@
-# Weathermap
+# PHP Weathermap for LibreNMS
 
-This is a modification of the PHP Network Weathermap plugin for libreNMS, the migrations corresponds to version 0.98a of the original Network Weathermap, see: https://github.com/howardjones/network-weathermap/tree/0.98-php7
+A network weathermap plugin for LibreNMS, based on PHP Weathermap 0.98.
 
-----
+## Quick Install
 
-This is  modified version of PHP Network Weathermap (original README is below)
+```bash
+# 1. Clone into the LibreNMS plugin directory
+cd /opt/librenms/app/Plugins
+git clone https://github.com/librenms-plugins/Weathermap.git Weathermap
 
-The modified version starts at version 0.1 by Neil Lathwood (neil@lathwood.co.uk) for use as a plugin for LibreNMS and currently includes basic support for picking out nodes and links from your LibreNMS install. See INSTALL for details.
+# 2. Install dependencies
+cd Weathermap
+composer install --no-dev
 
-This is PHP Network Weathermap, version 0.97b by Howard Jones (howie@thingy.com)
+# 3. Symlink public assets into the web root
+ln -s /opt/librenms/app/Plugins/Weathermap/public /opt/librenms/public/plugins/Weathermap
 
-See the docs sub-directory for full HTML documentation, FAQ and example config.
+# 4. Set permissions
+chown -R librenms:librenms /opt/librenms/app/Plugins/Weathermap
+chmod 775 configs
+mkdir -p public/output && chown www-data:www-data public/output
 
-See CHANGES for the most recent updates, listed by version.
+# 5. Add to cron (/etc/cron.d/librenms)
+# */5 * * * * librenms php /opt/librenms/app/Plugins/Weathermap/bin/map-poller >> /dev/null 2>&1
+```
 
-See COPYING for the license under which php-weathermap is released.
+Then enable the plugin in LibreNMS under **Settings → Plugins → Weathermap**.
 
-There is much more information, tutorials and updates available at:
-http://www.network-weathermap.com/
+See [INSTALL.md](INSTALL.md) for full instructions.
 
+## Structure
 
-----
+```
+app/Plugins/Weathermap/
+├── bin/              # CLI tools (weathermap, map-poller)
+├── configs/          # Map config files (writable by web server)
+├── lib/              # PHP library
+│   ├── base/         # Abstract base classes
+│   ├── datasources/  # Data source plugins (rrd, snmp, fping, …)
+│   ├── drawing/      # Image rendering functions
+│   ├── editor/       # Editor functions
+│   ├── geometry/     # Geometry classes
+│   ├── html/         # HTML imagemap classes
+│   ├── keywords/     # Map config keyword definitions
+│   ├── map/          # Core map classes (WeatherMap, Node, Link)
+│   └── util/         # Utility and formatting functions
+├── public/           # Web-accessible files (symlinked into LibreNMS web root)
+│   ├── editor.php    # Visual map editor
+│   ├── images/       # Node icons
+│   ├── output/       # Generated map images and HTML (writable)
+│   └── editor-resources/
+├── resources/views/  # Blade templates for LibreNMS plugin pages
+├── Menu.php          # LibreNMS plugin menu entry
+├── Page.php          # LibreNMS plugin page handler
+├── Settings.php      # LibreNMS plugin settings handler
+├── composer.json     # PSR-4 autoload configuration
+└── config.php    # Plugin configuration defaults
+```
 
-PHP Weathermap contains components from other software developers:
+## Data Sources
 
-overlib.js is part of Overlib 4.21, copyright Erik Bosrup 1998-2004. All rights reserved.
-See http://www.bosrup.com/web/overlib/?License
-
-The Bitstream Vera Open Source fonts (Vera*.ttf) are copyright Bitstream, Inc.
-See http://www.bitstream.com/font_rendering/products/dev_fonts/vera.html
-
-The manual uses the Kube CSS Framework - http://imperavi.com/kube/
-and ParaType's PT Sans font: http://www.fontsquirrel.com/fonts/PT-Sans
-
-jquery-latest.min.js is the jQuery javascript library - written by John Resig and collaborators.
-http://docs.jquery.com/Licensing
-
-Some of the icons used in the editor, and also supplied in the images/ folder are
-from the excellent Fam Fam Fam Silk icon collection by Mark James:
-http://www.famfamfam.com/lab/icons/silk/
-These are released under the Creative Commons Attribution 2.5 License
-http://creativecommons.org/licenses/by/2.5/
-
-----
-
-Thanks to Edgeuno for the support, visit us at https://edgeuno.com/
+| Source | Target syntax | Notes |
+|---|---|---|
+| RRD | `rrd:/path/to/file.rrd:DS_IN:DS_OUT` | Uses LibreNMS rrd_dir by default |
+| SNMP v1 | `snmp:community:host:OID_IN:OID_OUT` | |
+| SNMP v2c | `snmp2c:community:host:OID_IN:OID_OUT` | |
+| SNMP v3 | `snmp3:...` | |
+| fping | `fping:hostname` | |
+| Static | `static:value_in:value_out` | |
+| Tab file | `tabfile:/path/to/file:key` | |
+| Time | `time:` | |
+| WM Data | `wmdata:/path/to/file:key` | |

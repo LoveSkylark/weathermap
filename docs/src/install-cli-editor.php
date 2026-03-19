@@ -96,7 +96,7 @@
             <p>
             If you use Cacti, and want to be able to pick
             data sources from your Cacti installation by name, you should use the
-                integrated access to the editor described on the '<a href="install-cacti-editor.html">Install Cacti + Editor</a>' page.
+                integrated access to the editor described on the '<a href="install-librenms-editor.html">Install Cacti + Editor</a>' page.
             </p>
 
             <p>

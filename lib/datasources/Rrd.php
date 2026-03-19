@@ -1,13 +1,16 @@
 <?php
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
+
 // RRDtool datasource plugin.
 //     gauge:filename.rrd:ds_in:ds_out
 //     filename.rrd:ds_in:ds_out
 //     filename.rrd:ds_in:ds_out
 
-include_once(dirname(__FILE__)."/../ds-common.php");
-include_once(dirname(__FILE__)."/../database.php");
 
-class WeatherMapDataSource_rrd extends WeatherMapDataSource 
+class Rrd extends DataSource
 {
 
     function Init(&$map)
@@ -476,7 +479,7 @@ class WeatherMapDataSource_rrd extends WeatherMapDataSource
         if($use_poller_output == 1)
         {
             wm_debug("Going to try poller_output, as requested.\n");
-            WeatherMapDataSource_rrd::wmrrd_read_from_poller_output($rrdfile,"AVERAGE",$start,$end, $dsnames, $data,$map, $data_time,$item);
+            Rrd::wmrrd_read_from_poller_output($rrdfile,"AVERAGE",$start,$end, $dsnames, $data,$map, $data_time,$item);
         }
 
         // if poller_output didn't get anything, or if it couldn't/didn't run, do it the old-fashioned way
@@ -486,12 +489,12 @@ class WeatherMapDataSource_rrd extends WeatherMapDataSource
         {
             if($aggregatefunction != '')
             {
-                WeatherMapDataSource_rrd::wmrrd_read_from_real_rrdtool_aggregate($rrdfile,$cfname,$aggregatefunction, $start,$end, $dsnames, $data,$map, $data_time,$item);
+                Rrd::wmrrd_read_from_real_rrdtool_aggregate($rrdfile,$cfname,$aggregatefunction, $start,$end, $dsnames, $data,$map, $data_time,$item);
             }
             else
             {
                 // do this the tried and trusted old-fashioned way
-                WeatherMapDataSource_rrd::wmrrd_read_from_real_rrdtool($rrdfile,$cfname,$start,$end, $dsnames, $data,$map, $data_time,$item);
+                Rrd::wmrrd_read_from_real_rrdtool($rrdfile,$cfname,$start,$end, $dsnames, $data,$map, $data_time,$item);
             }
         }
         else
@@ -519,5 +522,3 @@ class WeatherMapDataSource_rrd extends WeatherMapDataSource
         return( array($data[IN], $data[OUT], $data_time) );
     }
 }
-
-// vim:ts=4:sw=4:

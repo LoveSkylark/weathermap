@@ -1,21 +1,18 @@
 #!/usr/bin/php
 <?php
 
-// PHP Weathermap 0.98b
-// Copyright Howard Jones, 2005-2020 howie@thingy.com
-// http://www.network-weathermap.com/
-// Released under the MIT License
 require_once 'Console/Getopt.php';
 
-require_once "lib/Weathermap.class.php";
+include_once dirname(__DIR__) . '/config.php';
 
-include_once 'config.inc.php';
+require_once $librenms_base . '/vendor/autoload.php';
+
+use Weathermap\Map\WeatherMap;
 
 if (!wm_module_checks()) { die ("Quitting: Module checks failed.\n"); }
 
 //    $weathermap_debugging=TRUE; 
 
-$output="html";
 $configfile="weathermap.conf";
 $htmlfile='';
 $imagefile='';
@@ -27,11 +24,15 @@ $defines=array();
 $daemon=0;
 $daemon_args="";
 
-// **************************************************************************************
-// THIS IS THE ONE LINE IN HERE YOU MIGHT HAVE TO CHANGE!
-$rrdtool="/usr/bin/rrdtool";
-// (on Windows, use / instead of \ in pathnames - c:/rrdtool/bin/rrdtool.exe for example)
-// **************************************************************************************
+// Pull runtime settings from LibreNMS config where available.
+if (class_exists('\LibreNMS\Config')) {
+    $rrdtool   = \LibreNMS\Config::get('rrdtool', $rrdtool);
+    $rrd_dir   = \LibreNMS\Config::get('rrd_dir', $librenms_base . '/rrd');
+    $rrdcached = \LibreNMS\Config::get('rrdcached', '');
+} else {
+    $rrd_dir   = $librenms_base . '/rrd';
+    $rrdcached = '';
+}
 
 // initialize object
 $cg=new Console_Getopt();
@@ -225,11 +226,18 @@ if(isset($options_output['debugging']) && $options_output['debugging'])
 	wm_debug("------------------------------------\n");
 }
 
-$map=new Weathermap;
+$map=new WeatherMap;
 $map->rrdtool = $rrdtool;
 $map->context="cli";
-$map->daemon=$daemon;
-$map->daemon_args=$daemon_args;
+
+// Use rrdcached from LibreNMS config if --daemon was not passed explicitly on the CLI.
+if ($daemon == 0 && $rrdcached !== '') {
+    $map->daemon = 1;
+    $map->daemon_args = $rrdcached;
+} else {
+    $map->daemon = $daemon;
+    $map->daemon_args = $daemon_args;
+}
 
 if(isset($chdir)) {
 	$map->chdir=$chdir;
@@ -276,11 +284,10 @@ if ($map->ReadConfig($configfile))
 	// Get rrd default path
     $rrdbase = $map->get_hint('rrd_default_path');
 
-	// Added the rrd_default_path if cannot be found
-    if($rrdbase == '') {
-        $rrdbase = isset($chdir) ? $chdir : $rrd_default_path1;
+	// Fall back to rrd_dir from LibreNMS config if not set in map config or --chdir
+    if ($rrdbase == '') {
+        $rrdbase = isset($chdir) ? $chdir : $rrd_dir;
         $map->add_hint('rrd_default_path', $rrdbase);
-
     }
 
     if ( (isset($options_output['sizedebug']) && ! $options_output['sizedebug']) || (!isset($options_output['sizedebug'])) )
@@ -332,14 +339,7 @@ if ($map->ReadConfig($configfile))
 
 	if ($dumpafter == 1)
 		print_r ($map);
-		
-#	print_r ($map->node_template_tree);
-#	print_r ($map->link_template_tree);
-	
-	# $map->cachefolder="editcache";	
-	# $map->CacheUpdate(1);
-	
-		
+
 }
 else { die ("\n\nCould not read Weathermap config file. No output produced. Maybe try --help?\n"); }
 
@@ -355,4 +355,3 @@ function my_assert_handler($file, $line, $code)
 	exit();
 }
 
-// vim:ts=4:sw=4:

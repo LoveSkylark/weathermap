@@ -1,11 +1,9 @@
 <?php
-	
-require_once 'lib/editor.inc.php';
-require_once 'lib/Weathermap.class.php';
-require_once 'lib/geometry.php';
-require_once 'lib/WMPoint.class.php';
-require_once 'lib/WMVector.class.php';
-require_once 'lib/WMLine.class.php';
+
+use Weathermap\Map\Node;
+use Weathermap\Map\Link;
+
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // so that you can't have the editor active, and not know about it.
 $ENABLED=true;
@@ -17,15 +15,15 @@ if(! $ENABLED)
     exit();
 }
 
-require_once 'config.inc.php';
+require_once dirname(__DIR__) . '/config.php';
 
 if( isset($_COOKIE['wmeditor']))
 {
-    //$parts = preg_split(":",$_COOKIE['wmeditor']);
-    
+    $parts = preg_split("/:/", $_COOKIE['wmeditor']);
+
     if( (isset($parts[0])) && (intval($parts[0]) == 1) ) { $use_overlay = TRUE; }
     if( (isset($parts[1])) && (intval($parts[1]) == 1) ) { $use_relative_overlay = TRUE; }
-    if( (isset($parts[2])) && (intval($parts[2]) != 0) ) { $grid_snap_value = intval($parts[2]); }   
+    if( (isset($parts[2])) && (intval($parts[2]) != 0) ) { $grid_snap_value = intval($parts[2]); }
 }
 
 if( isset($config) )
@@ -33,25 +31,27 @@ if( isset($config) )
     $configerror = 'OLD editor config file format. The format of this file changed in version 0.92 - please check the new editor-config.php-dist and update your editor-config.php file. [WMEDIT02]';
 }
 
-// check if the goalposts have moved
+// Bootstrap Laravel and verify authentication.
 $librenms_found = false;
-if (is_dir($librenms_base) && file_exists($librenms_base . "/.env")) {
-    // Boot LibreNMS
-    $init_modules = ['web', 'auth'];
-    require $librenms_base . '/includes/init.php';
-    if (!Auth::check()) {
-        header('Location: /');
+if (is_dir($librenms_base) && file_exists($librenms_base . '/.env')) {
+    require_once $librenms_base . '/vendor/autoload.php';
+    $app    = require $librenms_base . '/bootstrap/app.php';
+    $kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+    $kernel->handle(\Illuminate\Http\Request::capture());
+
+    if (! $app->make('auth')->guard()->check()) {
+        header('Location: /login');
         exit;
     }
-    chdir($librenms_base . '/html/plugins/Weathermap');
     $librenms_found = true;
 }
+
+// Work from the plugin root so all engine-relative paths resolve correctly.
+chdir(realpath(__DIR__ . '/..'));
 
 if(! is_writable($mapdir)) {
 	$configerror = "The map config directory is not writable by the web server user. You will not be able to edit any files until this is corrected. [WMEDIT01]";
 }
-
-chdir(dirname(__FILE__));
 
 $action = '';
 $mapname = '';
@@ -448,7 +448,6 @@ else
 		$map->width = intval($_REQUEST['map_width']);
 		$map->height = intval($_REQUEST['map_height']);
 
-		// XXX sanitise this a bit
 		if($_REQUEST['map_bgfile'] == '--NONE--')
 		{
 		    $map->background='';    
@@ -546,7 +545,7 @@ else
 
 		if($a != $b && isset($map->nodes[$a]) && isset($map->nodes[$b]) )
 		{
-			$newlink = new WeatherMapLink;
+			$newlink = new Link;
 			$newlink->Reset($map);
 			
 			$newlink->a = $map->nodes[$a];
@@ -850,7 +849,7 @@ else
 			$newnodename .= "a";
 		}
 		
-		$node = new WeatherMapNode;
+		$node = new Node;
 		$node->name = $newnodename;
 		$node->template = "DEFAULT";
 		$node->Reset($map);
@@ -921,7 +920,7 @@ else
 			    $newnodename = $newnodename."_copy";
 		    } while(isset($map->nodes[$newnodename]));
 		    
-		    $node = new WeatherMapNode;
+		    $node = new Node;
 		    $node->Reset($map);
 		    $node->CopyFrom($map->nodes[$target]);
 
@@ -994,7 +993,7 @@ else
 	</style>
   <link rel="stylesheet" type="text/css" media="screen" href="editor-resources/oldeditor.css" />
 
-<script src="vendor/jquery/dist/jquery.min.js" type="text/javascript"></script>
+<script src="/vendor/jquery/dist/jquery.min.js" type="text/javascript"></script>
 <script src="editor-resources/editor.js" type="text/javascript"></script>
 	<script type="text/javascript">
 	

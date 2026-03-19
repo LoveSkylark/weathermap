@@ -1,37 +1,93 @@
-### Notice
-This is a modification of the PHP Network Weathermap plugin for libreNMS, the idea is to migrate to version 0.98a of the original Network Weathermap
+# Installation
 
-----
-### Prerequisites
+## Prerequisites
 
-Network-WeatherMap requires php pear to work.
+- LibreNMS installed at `/opt/librenms` (or your chosen path)
+- PHP 8.0 or newer
+- PHP extensions: `gd`, `snmp`, `json`
+- Composer
 
-### Installing Network-WeatherMap
+---
 
-### Step 1. 
-Extract to your LibreNMS plugins directory `/opt/librenms/html/plugins` so you should see something like `/opt/librenms/html/plugins/Weathermap/`
-The best way to do this is via git. Go to your install directory and then `/opt/librenms/html/plugins`
-Enter:
-#### Original repository
-    `git clone https://github.com/librenms-plugins/Weathermap.git`
-    
-### Step 2.
-Inside the html/plugins directory, change the ownership of the Weathermap directory by typing `chown -R librenms:librenms Weathermap/`
-Make the configs directory writeable `chmod 775 /opt/librenms/html/plugins/Weathermap/configs`
-Note if you are using SELinux you need to input the following command `chcon -R -t httpd_cache_t Weathermap/`
-#### (Note: In order to make the config writable for set ownership of the config directory to `chown -R www-data:www-data /opt/librenms/html/plugins/Weathermap/configs/`  )
+## Step 1 — Clone into LibreNMS plugin directory
 
-### Step 3. 
-Enable the cron process by editing your current LibreNMS cron file (typically /etc/cron.d/librenms) and add the following:
-LibreNMS:  `*/5 * * * * librenms /opt/librenms/html/plugins/Weathermap/map-poller.php >> /dev/null 2>&1`
+```bash
+cd /opt/librenms/app/Plugins
+git clone https://github.com/librenms-plugins/Weathermap.git Weathermap
+```
 
-### Step 4. 
-Enable the plugin from LibreNMS Web UI in OverView ->Plugins -> Plugin Admin menu.
+## Step 2 — Install Composer dependencies
 
-### Step 5. 
-Now you should see Weathermap Overview -> Plugins -> Weathermap
-Create your maps, please note when you create a MAP, please click Map Style, ensure Overlib is selected for HTML Style and click submit.
-Also, ensure you set an output image filename and output HTML filename in Map Properties.
-I'd recommend you use the output folder as this is excluded from git updates (i.e enter output/mymap.png and output/mymap.html).
+```bash
+cd /opt/librenms/app/Plugins/Weathermap
+composer install --no-dev
+```
 
-Optional: If your install is in another directory than standard, set `$basehref` within `map-poller.php`.
+## Step 3 — Create the public symlink
+
+This makes the editor, images, and assets web-accessible:
+
+```bash
+ln -s /opt/librenms/app/Plugins/Weathermap/public /opt/librenms/public/plugins/Weathermap
+```
+
+## Step 4 — Set permissions
+
+```bash
+chown -R librenms:librenms /opt/librenms/app/Plugins/Weathermap
+chmod 775 /opt/librenms/app/Plugins/Weathermap/configs
+```
+
+If you are using SELinux:
+
+```bash
+chcon -R -t httpd_cache_t /opt/librenms/app/Plugins/Weathermap
+```
+
+## Step 5 — Create the output directory
+
+Map images and HTML output are written here:
+
+```bash
+mkdir -p /opt/librenms/app/Plugins/Weathermap/public/output
+chown www-data:www-data /opt/librenms/app/Plugins/Weathermap/public/output
+```
+
+## Step 6 — Add the poller cron job
+
+Edit `/etc/cron.d/librenms` and add:
+
+```
+*/5 * * * * librenms php /opt/librenms/app/Plugins/Weathermap/bin/map-poller >> /dev/null 2>&1
+```
+
+## Step 7 — Enable the plugin
+
+In LibreNMS go to **Settings → Plugins** and enable **Weathermap**.
+
+---
+
+## Configuration
+
+The plugin reads the following settings automatically from LibreNMS:
+
+| Setting | LibreNMS config key |
+|---|---|
+| rrdtool binary path | `rrdtool` |
+| RRD data directory | `rrd_dir` |
+| rrdcached socket | `rrdcached` |
+| fping binary path | `fping` |
+| SNMP timeout | `snmp.timeout` |
+| SNMP retries | `snmp.retries` |
+
+To override the rrdtool path or other defaults, copy `editor-config.php-dist` to `editor-config.php` and edit it.
+
+---
+
+## Verify the installation
+
+Navigate to `http://yourserver/plugins/Weathermap/check.php` in a browser, or run from the command line:
+
+```bash
+php /opt/librenms/app/Plugins/Weathermap/public/check.php
+```

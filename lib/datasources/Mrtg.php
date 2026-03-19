@@ -1,10 +1,15 @@
 <?php
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
+
 // Sample Pluggable datasource for PHP Weathermap 0.9
 // - read a pair of values from a database, and return it
 
 // TARGET dbplug:databasename:username:pass:hostkey
 
-class WeatherMapDataSource_mrtg extends WeatherMapDataSource {
+class Mrtg extends DataSource {
 
 	function Recognise($targetstring)
 	{

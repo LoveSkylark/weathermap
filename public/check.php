@@ -14,7 +14,6 @@
       $s = ob_get_contents();
       ob_end_clean();
 
-      // <tr><td class="e">System </td><td class="v">Windows NT BLINKYZERO 6.0 build 6000 </td></tr>
       // since preg_* are potentially missing, we'll have to do this without regexps.
       foreach (explode("\n",$s) as $line)
       {
@@ -51,8 +50,7 @@
             }
             else
             {
-                  $gdstring="This PHP uses the system GD library, which MIGHT have alpha-blending bugs. Check that you have at least GD 2.0.34 installed, if you see problems with weathermap segfaulting.\n";
-		  $gdstring .= "You can test for this specific fault by running check-gdbug.php\n";
+                  $gdstring="This PHP uses the system GD library. Check that you have at least GD 2.0.34 installed.\n";
             }
       }
       else
@@ -66,7 +64,7 @@
     print "\n----------------------------------------------------\nWeathermap Pre-Install Checker\n\n";     
 	print "This script checks for some common problems with your PHP and server\nenvironment that may stop Weathermap or the Editor from working.\n\n";
 	print "NOTE: You should run this script as both a web page AND from the\ncommand-line, as the environment can be different in each.\n";
-        print "\nThis is the PHP version that is responsible for \n* creating maps from the Cacti poller\n* the command-line weathermap tool\n\n";
+        print "\nThis is the PHP version that is responsible for \n* running the map poller (bin/map-poller)\n* the command-line weathermap tool (bin/weathermap)\n\n";
         print "PHP Basics\n----------\n";
         print wordwrap("This is PHP Version $php_version running on \"$php_os\" with a memory_limit of '$mem_allowed'. $mem_warning\n");
         print "\nThe php.ini file was $ini_file\n$extra_ini\n\n";
@@ -99,7 +97,7 @@
     <p>This page checks for some common problems with your PHP and server environment that may stop Weathermap or the Editor from working.</p>
 	<p>NOTE: You should run this script as a web page AND from the command-line, as the environment can be different in each.</p>
       <h2>PHP Basics</h2><p>This is the PHP version that is responsible for</p><ul>
-      <li>The web-based editor</li><li>Building maps with Rebuild Now from Cacti</li></ul>
+      <li>The web-based editor</li><li>Running the map poller (bin/map-poller)</li></ul>
       <p>This is PHP Version <?php echo $php_version ?> running on "<?php echo $php_os ?>" with a memory_limit of '<?php echo $mem_allowed ?>'. <?php echo $mem_warning ?></p>
       <p>The php.ini file was <?php echo $ini_file ?></p>
       <p><?php echo $extra_ini ?></p>
@@ -128,7 +126,7 @@
                   'imagejpeg' => array(FALSE,FALSE,'JPEG output support','an optional part of the GD library and the "gd" PHP extension'),
                   'imagegif' => array(FALSE,FALSE,'GIF output support','an optional part of the GD library and the "gd" PHP extension'),
 		  # 'imagefilter' => array(FALSE, FALSE, 'colorizing icons','a special function of the PHP-supplied GD library ONLY (not the external GD library'.($gdbuiltin?'':' that you are using').')'),
-		  'imagecopyresampled' => array(FALSE,FALSE,'Thumbnail creation in the Cacti plugin','an optional part of the GD library and the "gd" PHP extension'),
+		  'imagecopyresampled' => array(FALSE,FALSE,'Thumbnail creation','an optional part of the GD library and the "gd" PHP extension'),
                   'imagettfbbox' => array(FALSE,FALSE,'TrueType font support','an optional part of the GD library and the "gd" PHP extension'),
                   'memory_get_usage' => array(FALSE,TRUE,'memory-usage debugging','not supported on all PHP versions and platforms')                 
                 );    
@@ -143,7 +141,7 @@
             if($included != 1)
             {
                   $noncritical++;
-                  print wordwrap("The Console_Getopt PEAR module is not available. The CLI weathermap tool will not run without it (that may not be a problem, if you only intend to use Cacti).\n\n");
+                  print wordwrap("The Console_Getopt PEAR module is not available. The CLI weathermap tool (bin/weathermap) will not run without it.\n\n");
             }
             else
             {
@@ -216,14 +214,14 @@
     {
 	    if($environment=='web') 
 		{
-        print "<p>If these functions are not found, you may need to <ul><li>check that the 'extension=' line for that extension is uncommented in your php.ini file (then restart your webserver), or<li>install the extension, if it isn't installed already</ul>On Debian/Ubuntu systems, you may also need to use the php5enmod command to enable the extension.</p>";
+        print "<p>If these functions are not found, you may need to <ul><li>check that the 'extension=' line for that extension is uncommented in your php.ini file (then restart your webserver), or<li>install the extension, if it isn't installed already</ul>On Debian/Ubuntu systems, you may also need to use the <code>phpenmod</code> command to enable the extension.</p>";
 		}
 		else
 		{
 			print "\nIf these functions are not found, you may need to\n * check that the 'extension=' line for that extension is uncommented in\n   your php.ini file (then restart your webserver), or\n * install the extension, if it isn't installed already\n\n";
 		}
 		
-        print wordwrap("The details of how this is done will depend on your operating system, and on where you installed (or compiled) your PHP from originally. Usually, you would install an RPM, or other package on Linux systems, a port on *BSD, or a DLL on Windows. If you build PHP from source, you need to add extra options to the './configure' line. Consult your PHP documention for more information.\n");
+        print wordwrap("The details of how this is done will depend on your operating system. Usually, you would install a package (apt/yum/dnf) or enable the extension in php.ini. Consult your PHP documentation for more information.\n");
 		if($environment=='web') print "</p>";
     }
 
@@ -277,6 +275,3 @@
     return $val;
 }
 ?>
-</table>
-</body>
-</html>

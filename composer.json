@@ -1,0 +1,29 @@
+{
+    "name": "librenms/weathermap-plugin",
+    "description": "PHP Weathermap plugin for LibreNMS",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "App\\Plugins\\Weathermap\\": "",
+            "Weathermap\\Base\\": "lib/base/",
+            "Weathermap\\Map\\": "lib/map/",
+            "Weathermap\\Geometry\\": "lib/geometry/",
+            "Weathermap\\Util\\": "lib/util/",
+            "Weathermap\\Html\\": "lib/html/",
+            "Weathermap\\DataSources\\": "lib/datasources/"
+        },
+        "files": [
+            "lib/keywords/WeatherMapKeywords.php",
+            "lib/util/UtilityFunctions.php",
+            "lib/util/FormattingFunctions.php",
+            "lib/drawing/ImageFunctions.php",
+            "lib/geometry/GeometryFunctions.php",
+            "lib/drawing/CurveCalculations.php",
+            "lib/editor/EditorFunctions.php"
+        ]
+    },
+    "require": {
+        "php": ">=8.0"
+    }
+}

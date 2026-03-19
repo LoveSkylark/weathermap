@@ -1,6 +1,8 @@
 <?php
-// Pluggable datasource for PHP Weathermap 0.9
-// - return a live SNMP value
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
 
 // doesn't work well with large values like interface counters (I think this is a rounding problem)
 // - also it doesn't calculate rates. Just fetches a value.
@@ -13,7 +15,7 @@
 // TARGET snmp:public:hostname:1.3.6.1.4.1.3711.1.1:1.3.6.1.4.1.3711.1.2
 // (that is, TARGET snmp:community:host:in_oid:out_oid
 
-class WeatherMapDataSource_snmp3 extends WeatherMapDataSource
+class Snmp3 extends DataSource
 {
     protected $owner;
     protected $regexpsHandled;
@@ -344,9 +346,16 @@ class WeatherMapDataSource_snmp3 extends WeatherMapDataSource
      */
     private function getMapGlobals()
     {
-        $this->timeout = intval($this->owner->get_hint("snmp_timeout", 1000000));
+        $defaultTimeout = class_exists('\LibreNMS\Config')
+            ? \LibreNMS\Config::get('snmp.timeout', 1) * 1000000
+            : 1000000;
+        $defaultRetries = class_exists('\LibreNMS\Config')
+            ? \LibreNMS\Config::get('snmp.retries', 2)
+            : 2;
+
+        $this->timeout    = intval($this->owner->get_hint("snmp_timeout", $defaultTimeout));
         $this->abortCount = intval($this->owner->get_hint("snmp_abort_count", 0));
-        $this->retryCount = intval($this->owner->get_hint("snmp_retries", 2));
+        $this->retryCount = intval($this->owner->get_hint("snmp_retries", $defaultRetries));
 
         wm_debug("Timeout changed to " . $this->timeout . " microseconds.\n");
         wm_debug("Will abort after $this->abortCount failures for a given host.\n");
@@ -361,5 +370,3 @@ function valueOrNull($value)
 {
     return $value === null ? '{null}' : $value;
 }
-
-// vim:ts=4:sw=4:

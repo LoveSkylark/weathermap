@@ -105,10 +105,10 @@
                 <p>How to install Weathermap depends on how you intend to use it:
 
                 <ul>
-                    <li><a href = "install-cacti-editor.html">As a Cacti Plugin, with
+                    <li><a href = "install-librenms-editor.html">As a Cacti Plugin, with
                     the web-based editor</a></li>
 
-                    <li><a href = "install-cacti.html">As a Cacti Plugin</a></li>
+                    <li><a href = "install-librenms.html">As a Cacti Plugin</a></li>
 
                     <li><a href = "install-cli-editor.html">As a standalone command-line
                     tool, with the web-based editor</a></li>
@@ -140,7 +140,7 @@
                 Cacti plugin, then it will be run for you as part of the Cacti poller
                 cycle. You don't need to do anything special apart from add your map
                 configuration files, as explained in the
-                <a href = "cacti-plugin.html">Cacti plugin</a> notes.</p>
+                <a href = "librenms-plugin.html">Cacti plugin</a> notes.</p>
 
                 <p>If you are using weathermap as a standalone tool, you do it using the
                 command line version. See the
