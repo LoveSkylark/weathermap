@@ -1,6 +1,10 @@
 <?php
 
-class WeatherMapDataSource_wmdata extends WeatherMapDataSource
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
+
+class WmData extends DataSource
 {
     function Recognise($targetstring)
     {
@@ -72,5 +76,3 @@ class WeatherMapDataSource_wmdata extends WeatherMapDataSource
         ));
     }
 }
-
-// vim:ts=4:sw=4:

@@ -1,6 +1,10 @@
 <?php
 
-class WeatherMapDataSource_time extends WeatherMapDataSource {
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
+
+class Time extends DataSource {
 
 	function Recognise($targetstring)
 	{
@@ -69,4 +73,3 @@ class WeatherMapDataSource_time extends WeatherMapDataSource {
 	}
 }
 
-// vim:ts=4:sw=4:

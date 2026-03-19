@@ -1,11 +1,13 @@
 <?php
-// Pluggable datasource for PHP Weathermap 0.9
-// - return a static value
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
 
 // TARGET static:10M
 // TARGET static:2M:256K
 
-class WeatherMapDataSource_static extends WeatherMapDataSource {
+class StaticSource extends DataSource {
 
 	function Recognise($targetstring)
 	{
@@ -44,5 +46,3 @@ class WeatherMapDataSource_static extends WeatherMapDataSource {
 		return ( array($inbw,$outbw,$data_time) );
 	}
 }
-
-// vim:ts=4:sw=4:

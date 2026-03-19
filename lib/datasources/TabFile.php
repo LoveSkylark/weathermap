@@ -1,10 +1,12 @@
 <?php
-// Sample Pluggable datasource for PHP Weathermap 0.9
-// - read a pair of values from a database, and return it
+
+namespace Weathermap\DataSources;
+
+use Weathermap\Base\DataSource;
 
 // TARGET dbplug:databasename:username:pass:hostkey
 
-class WeatherMapDataSource_tabfile extends WeatherMapDataSource {
+class TabFile extends DataSource {
 
 	function Recognise($targetstring)
 	{
@@ -56,5 +58,3 @@ class WeatherMapDataSource_tabfile extends WeatherMapDataSource {
 			return( array($data[IN], $data[OUT], $data_time) );
 	}
 }
-
-// vim:ts=4:sw=4:
