@@ -12,9 +12,6 @@ $librenms_base = dirname($plugin_dir, 3);
 $ignore_librenms = false;
 $configerror     = '';
 
-// Optional per-installation overrides (gitignored).
-@include_once $plugin_dir . '/editor-config.php';
-
 // Editor overlay settings (changed via the Editor Settings dialog).
 $use_overlay          = false;
 $use_relative_overlay = false;

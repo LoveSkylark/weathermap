@@ -34,7 +34,7 @@ class Page
             'writable'   => $writable,
             'images'     => $images,
             'editor_url' => asset('plugins/Weathermap/editor.php'),
-            'readme'     => nl2br((string) @file_get_contents($plugin_dir . '/INSTALL.md')),
+            'readme'     => nl2br(file_exists($plugin_dir . '/INSTALL.md') ? file_get_contents($plugin_dir . '/INSTALL.md') : ''),
         ];
     }
 }

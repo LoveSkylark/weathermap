@@ -1,8 +1,6 @@
 #!/usr/bin/php
 <?php
 
-require_once 'Console/Getopt.php';
-
 include_once dirname(__DIR__) . '/config.php';
 
 require_once $librenms_base . '/vendor/autoload.php';
@@ -11,18 +9,15 @@ use Weathermap\Map\WeatherMap;
 
 if (!wm_module_checks()) { die ("Quitting: Module checks failed.\n"); }
 
-//    $weathermap_debugging=TRUE; 
-
-$configfile="weathermap.conf";
-$htmlfile='';
-$imagefile='';
-$dumpafter=0;
-$dumpstats=0;
-$randomdata=0;
-$dumpconfig='';
-$defines=array();
-$daemon=0;
-$daemon_args="";
+$configfile  = 'weathermap.conf';
+$htmlfile    = '';
+$imagefile   = '';
+$dumpafter   = 0;
+$dumpstats   = 0;
+$randomdata  = 0;
+$dumpconfig  = '';
+$defines     = [];
+$daemon_socket = '';
 
 // Pull runtime settings from LibreNMS config where available.
 if (class_exists('\LibreNMS\Config')) {
@@ -34,187 +29,86 @@ if (class_exists('\LibreNMS\Config')) {
     $rrdcached = '';
 }
 
-// initialize object
-$cg=new Console_Getopt();
-$short_opts='';
-$long_opts=array
-	(
-		"version",
-		"help",
-		"image-uri=",
-		"base-href=",
-		"config=",
-		"output=",
-		"debug",
-		"uberdebug",
-		"stats",
-		"define=",
-		"no-data",
-		"randomdata",
-		"htmloutput=",
-		"dumpafter",
-		"bulge",
-		"sizedebug",
-		"dumpconfig=",
-        "daemon=",
-		"chdir="
-	);
+$opts = getopt('', [
+    'version', 'help',
+    'config:', 'output:', 'htmloutput:',
+    'image-uri:', 'base-href:',
+    'define:', 'no-warn:',
+    'daemon:',  'dumpconfig:',
+    'debug', 'uberdebug',
+    'no-data', 'sizedebug', 'randomdata',
+    'bulge', 'dumpafter', 'stats',
+]);
 
-$args=$cg->readPHPArgv();
+$options_output = [];
 
-$ret=$cg->getopt($args, $short_opts, $long_opts);
+if (isset($opts['version'])) {
+    print 'PHP Network Weathermap v' . $WEATHERMAP_VERSION . "\n";
+    exit();
+}
 
-$pear = new PEAR;
-if ($pear->isError($ret)) { die ("Error in command line: " . $ret->getMessage() . "\n (try --help)\n"); }
+if (isset($opts['help'])) {
+    print 'PHP Network Weathermap v' . $WEATHERMAP_VERSION . "\n";
+    print "Copyright Howard Jones, 2005-2020 howie@thingy.com\nReleased under the MIT License\n\n";
+    print "Usage: php weathermap [options]\n\n";
+    print " --config {filename}      -  config file to read. Default weathermap.conf\n";
+    print " --output {filename}      -  image file to write. Default weathermap.png\n";
+    print " --htmloutput {filename}  -  HTML file to write\n\n";
+    print " --base-href {uri}        -  URI for Weathermap, e.g. /weathermap/\n";
+    print " --image-uri {uri}        -  URI prefix for <img> tags in HTML\n";
+    print " --bulge                  -  enable link-bulging mode\n\n";
+    print " --define name=value      -  define internal variable (like global SET)\n";
+    print " --no-warn {codes}        -  suppress comma-separated warning codes\n\n";
+    print " --no-data                -  skip data reading (grey map)\n";
+    print " --randomdata             -  use random data instead of live data\n";
+    print " --debug                  -  enable debug output\n";
+    print " --uberdebug              -  enable all trace messages\n";
+    print " --dumpafter              -  dump internal PHP structures\n";
+    print " --dumpconfig {filename}  -  write parsed config to file\n";
+    print " --stats                  -  dump feature usage statistics\n\n";
+    print " --daemon {path}          -  rrdcached socket (overrides LibreNMS config)\n\n";
+    print " --help                   -  show this help\n";
+    print " --version                -  show version number\n";
+    exit();
+}
 
-$gopts=$ret[0];
+if (isset($opts['config']))      { $configfile  = $opts['config']; }
+if (isset($opts['output']))      { $imagefile   = $opts['output']; }
+if (isset($opts['htmloutput']))  { $htmlfile    = $opts['htmloutput']; }
+if (isset($opts['dumpconfig']))  { $dumpconfig  = $opts['dumpconfig']; }
+if (isset($opts['daemon']))      { $daemon_socket = $opts['daemon']; }
+if (isset($opts['dumpafter']))   { $dumpafter   = 1; }
+if (isset($opts['randomdata']))  { $randomdata  = 1; }
+if (isset($opts['stats']))       { $dumpstats   = 1; }
 
-$options_output = array();
+if (isset($opts['image-uri']))   { $options_output['imageuri']  = $opts['image-uri']; }
+if (isset($opts['base-href']))   { $options_output['basehref']  = $opts['base-href']; }
+if (isset($opts['no-data']) || isset($opts['sizedebug'])) { $options_output['sizedebug'] = true; }
+if (isset($opts['bulge']))       { $options_output['widthmod']  = true; }
 
-if (sizeof($gopts) > 0)
-{
-	foreach ($gopts as $o)
-	{
-		switch ($o[0])
-		{
-		case '--config':
-			$configfile=$o[1];			
-			break;
+if (isset($opts['uberdebug'])) {
+    $weathermap_debug_suppress = [];
+}
+if (isset($opts['uberdebug']) || isset($opts['debug'])) {
+    $options_output['debugging'] = true;
+    $weathermap_debugging = true;
+}
 
-		case '--htmloutput':
-			$htmlfile=$o[1];
-			break;
+if (isset($opts['no-warn'])) {
+    foreach (explode(',', $opts['no-warn']) as $code) {
+        $weathermap_error_suppress[] = strtoupper(trim($code));
+    }
+}
 
-		case '--dumpafter':
-			$dumpafter=1;
-			break;
-
-		case '--image-uri':
-			// $map->imageuri=$o[1];
-			$options_output['imageuri'] = $o[1];
-			break;
-
-		case '--base-href':
-			// $map->basehref=$o[1];
-			$options_output['basehref'] = $o[1];
-			break;
-		case '--dumpconfig':
-			//$map->dumpconfig=$o[1];
-			// $options_output['dumpconfig'] = $o[1];
-			$dumpconfig=$o[1];
-			break;
-
-		case '--randomdata':
-			$randomdata=1;
-			break;
-
-		case '--stats':
-			$dumpstats=1;
-			break;
-		case '--no-warn':
-			// allow disabling of warnings from the command-line, too (mainly for the rrdtool warning)
-			$suppress_warnings = explode(",", $o[1]);
-			foreach ($suppress_warnings as $s) {
-				$weathermap_error_suppress[] = strtoupper($s);
-			}
-			break;
-
-		case '--uberdebug':
-			// allow ALL trace messages (normally we block some of the chatty ones)
-			$weathermap_debug_suppress=array();
-			// FALL THROUGH
-		case '--debug':
-			$options_output['debugging'] = TRUE;
-			$weathermap_debugging=TRUE;
-			
-			// enable assertion handling
-			assert_options(ASSERT_ACTIVE, 1);
-			assert_options(ASSERT_WARNING, 0);
-			assert_options(ASSERT_QUIET_EVAL, 1);
-
-			// Set up the callback
-			assert_options(ASSERT_CALLBACK, 'my_assert_handler');
-			
-			break;
-
-		case '--sizedebug':
-		case '--no-data':
-			//$map->sizedebug=TRUE;
-			$options_output['sizedebug'] = TRUE;
-			break;
-
-		case '--bulge':
-			//$map->widthmod=TRUE;
-			$options_output['widthmod'] = TRUE;
-			break;
-
-		case '--output':
-			$imagefile=$o[1];
-			break;
-
-        case '--daemon':
-            $daemon=1;
-            $daemon_args=$o[1];
-            #$rrdtool = $rrdtool . " --daemon ".$o[1];
-            break;
-
-        case '--chdir':
-		    $chdir = $o[1];
-            break;
-			
-        case '--define':
-            preg_match("/^([^=]+)=(.*)\s*$/",$o[1],$matches);
-			if(isset($matches[2]))
-			{
-	            $varname = $matches[1];
-	            $value = $matches[2];
-				wm_debug(">> $varname = '$value'\n");
-	            // save this for later, so that when the map object exists, it can be defined
-	            $defines[$varname]=$value;
-			}
-			else
-			{
-				print "WARNING: --define format is:  --define name=value\n";
-			}            
-            break;
-
-		case '--version': 
-			print 'PHP Network Weathermap v' . $WEATHERMAP_VERSION."\n";
-			exit();
-			break;
-
-		case '--help':
-                        print 'PHP Network Weathermap v' . $WEATHERMAP_VERSION."\n";
-                        print "Copyright Howard Jones, 2005-2020 howie@thingy.com\nReleased under the MIT License\nhttp://www.network-weathermap.com/\n\n";
-
-			            print "Usage: php weathermap [options]\n\n";
-                        
-                        print " --config {filename}      -  filename to read from. Default weathermap.conf\n";
-                        print " --output {filename}      -  filename to write image. Default weathermap.png\n";
-                        print " --htmloutput {filename}  -  filename to write HTML. Default weathermap.html\n\n";
-                        
-			            print " --base-href {uri}        - URI for Weathermap, i.e /weathermap/\n";
-                        print " --image-uri {uri}        -  URI to prefix <img> tags in HTML.\n";
-                        print " --bulge                  -  Enable link-bulging mode. See manual.\n\n";
-						
-						print " --define name=value      -  Define internal variables\n";
-						print "                             (equivalent to global SET in config file)\n\n";
-                        
-                        print " --no-data                -  skip the data-reading process (just a 'grey' map)\n";
-                        print " --randomdata            -  as above, but use random data\n";
-                        print " --debug                  -  produce (LOTS) of debugging information during run\n";
-                        print " --dump-after             -  dump all internal PHP structures (HUGE)\n";
-                        print " --dumpconfig {filename}  -  filename to write a new config to (for testing)\n\n";
-                        
-                        print " --help                   -  show this help\n";
-                        print " --version                -  show version number\n\n";
-                        print " --daemon {path}          -  path to rrdcached sock\n\n";
-						print " --chdir {path}           -  path to change to before running rrdtool\n\n";
-                        print "More info at http://www.network-weathermap.com/\n";
-			exit();
-			break;
-		}
-	}
+if (isset($opts['define'])) {
+    $raw = is_array($opts['define']) ? $opts['define'] : [$opts['define']];
+    foreach ($raw as $def) {
+        if (preg_match("/^([^=]+)=(.*)\s*$/", $def, $m)) {
+            $defines[$m[1]] = $m[2];
+        } else {
+            print "WARNING: --define format is: --define name=value\n";
+        }
+    }
 }
 
 // set this BEFORE we create the map object, so we get the debug output from Reset(), as well
@@ -230,17 +124,10 @@ $map=new WeatherMap;
 $map->rrdtool = $rrdtool;
 $map->context="cli";
 
-// Use rrdcached from LibreNMS config if --daemon was not passed explicitly on the CLI.
-if ($daemon == 0 && $rrdcached !== '') {
-    $map->daemon = 1;
-    $map->daemon_args = $rrdcached;
-} else {
-    $map->daemon = $daemon;
-    $map->daemon_args = $daemon_args;
-}
-
-if(isset($chdir)) {
-	$map->chdir=$chdir;
+// Pass rrdcached socket via hint: CLI --daemon takes priority over LibreNMS config.
+$resolved_socket = $daemon_socket !== '' ? $daemon_socket : $rrdcached;
+if ($resolved_socket !== '') {
+    $map->add_hint('rrd_daemon', $resolved_socket);
 }
 
 // now stuff in all the others, that we got from getopts
@@ -343,15 +230,4 @@ if ($map->ReadConfig($configfile))
 }
 else { die ("\n\nCould not read Weathermap config file. No output produced. Maybe try --help?\n"); }
 
-
-
-function my_assert_handler($file, $line, $code)
-{
-    echo "Assertion Failed:
-        File $file
-        Line $line
-        Code $code";
-	debug_print_backtrace();
-	exit();
-}
 

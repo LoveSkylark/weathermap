@@ -12,10 +12,19 @@ use Weathermap\Base\DataSource;
 
 class Rrd extends DataSource
 {
+    private $rrdcachedSocket = '';
 
     function Init(&$map)
     {
         global $config;
+
+        // Resolve rrdcached socket: CLI hint > LibreNMS config > disabled
+        $hint = $map->get_hint('rrd_daemon');
+        if ($hint != '') {
+            $this->rrdcachedSocket = $hint;
+        } elseif (class_exists('\LibreNMS\Config')) {
+            $this->rrdcachedSocket = \LibreNMS\Config::get('rrdcached', '');
+        }
 
         if (file_exists($map->rrdtool))
         {
@@ -36,11 +45,6 @@ class Rrd extends DataSource
             wm_warn("RRD DS: Can't find RRDTOOL. Check line 29 of the 'weathermap' script.\nRRD-based TARGETs will fail. [WMRRD02]\n");
         }
         
-        if($map->context=='cacti')
-        {    // unlikely to ever occur
-            wm_warn("RRD DS: Can't find RRDTOOL. Check your Cacti config. [WMRRD03]\n");
-        }
-
         return(FALSE);
     }
 
@@ -68,9 +72,9 @@ class Rrd extends DataSource
         $extra_options = $map->get_hint("rrd_options");
 
         // rrdcached Support: strip "./" from Data Source
-        if ($map->daemon)
+        if ($this->rrdcachedSocket != '')
         {
-            $rrdfile = trim($rrdfile,"^./"); 
+            $rrdfile = trim($rrdfile,"^./");
         }
 
         // Assemble an array of command args.
@@ -87,19 +91,16 @@ class Rrd extends DataSource
         $args[] = $end;
 
         // rrdcached Support: Use daemon
-        if ($map->daemon)
+        if ($this->rrdcachedSocket != '')
         {
             $args[] = "--daemon";
-            $args[] = $map->daemon_args;
+            $args[] = $this->rrdcachedSocket;
         }
 
         // assemble an appropriate RRDtool command line, skipping any '-' DS names.
         // $command = $map->rrdtool . " graph /dev/null -f ''  --start $start --end $end ";
         if($dsnames[IN] != '-')
         {
-            # $command .= "DEF:in=$rrdfile:".$dsnames[IN].":$cf ";
-            # $command .= "VDEF:agg_in=in,$aggregatefn ";
-            # $command .= "PRINT:agg_in:'IN %lf' ";
 
             $args[] = "DEF:in=$rrdfile:".$dsnames[IN].":$cf";
             $args[] = "VDEF:agg_in=in,$aggregatefn";
@@ -108,9 +109,6 @@ class Rrd extends DataSource
 
         if($dsnames[OUT] != '-')
         {
-            # $command .= "DEF:out=$rrdfile:".$dsnames[OUT].":$cf ";
-            # $command .= "VDEF:agg_out=out,$aggregatefn ";
-            # $command .= "PRINT:agg_out:'OUT %lf' ";
 
             $args[] = "DEF:out=$rrdfile:".$dsnames[OUT].":$cf";
             $args[] = "VDEF:agg_out=out,$aggregatefn";
@@ -200,9 +198,7 @@ class Rrd extends DataSource
     {
         wm_debug("RRD ReadData: traditional style\n");
 
-        // we get the last 800 seconds of data - this might be 1 or 2 lines, depending on when in the
-        // cacti polling cycle we get run. This ought to stop the 'some lines are grey' problem that some
-        // people were seeing
+        // fetch the last 800 seconds — may return 1 or 2 lines depending on RRD step alignment
 
         $extra_options = $map->get_hint("rrd_options");
 
@@ -210,11 +206,11 @@ class Rrd extends DataSource
         $args = array();
         
         // rrdcached Support: strip "./" from Data Source
-        if ($map->daemon)
+        if ($this->rrdcachedSocket != '')
         {
             $rrdfile = preg_replace('/^\.\//', '', $rrdfile);
         }
-        
+
         $args[] = "fetch";
         $args[] = $rrdfile;
         $args[] = $cf;
@@ -224,10 +220,10 @@ class Rrd extends DataSource
         $args[] = $end;
 
         // rrdcached Support: Use daemon
-        if ($map->daemon)
+        if ($this->rrdcachedSocket != '')
         {
             $args[] = "--daemon";
-            $args[] = $map->daemon_args;
+            $args[] = $this->rrdcachedSocket;
         }
 
         $command = $map->rrdtool;
@@ -296,7 +292,6 @@ class Rrd extends DataSource
                     {
                         $h = $heads[$i];
                         $v = $cols[$i];
-                        # print "|$h|,|$v|\n";
                         $values[$h] = trim($v);
                     }
 

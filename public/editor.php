@@ -26,11 +26,6 @@ if( isset($_COOKIE['wmeditor']))
     if( (isset($parts[2])) && (intval($parts[2]) != 0) ) { $grid_snap_value = intval($parts[2]); }
 }
 
-if( isset($config) )
-{
-    $configerror = 'OLD editor config file format. The format of this file changed in version 0.92 - please check the new editor-config.php-dist and update your editor-config.php file. [WMEDIT02]';
-}
-
 // Bootstrap Laravel and verify authentication.
 $librenms_found = false;
 if (is_dir($librenms_base) && file_exists($librenms_base . '/.env')) {
@@ -980,16 +975,6 @@ else
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <style type="text/css">
-<?php
-		// if the cacti config was included properly, then 
-		// this will be non-empty, and we can unhide the cacti links in the Link Properties box
-		// NOTE: change for libreNMS
-		if( ! isset($config['install_dir']) )
-		{
-			echo "    .cactilink { display: none; }\n";
-			echo "    .cactinode { display: none; }\n";
-		}
-?>
 	</style>
   <link rel="stylesheet" type="text/css" media="screen" href="editor-resources/oldeditor.css" />
 
@@ -1106,7 +1091,7 @@ else
 		  <tr>
 			<th>'Hover' Graph URL</th>
 			<td><input id="node_hover" name="node_hover" type="text" />
-			<span class="cactinode"><a id="node_librenmspick">[Pick from LibreNMS]</a></span></td>
+			<span class="librenmspick"><a id="node_librenmspick">[Pick from LibreNMS]</a></span></td>
 		  </tr>
 		  <tr>
 			<th>Icon Filename</th>

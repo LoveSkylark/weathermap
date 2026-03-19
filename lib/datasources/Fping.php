@@ -48,9 +48,6 @@ class Fping extends DataSource {
 		$data[OUT] = NULL;
 		$data_time = 0;
 
-		#debug("-------------------------\n");
-		#print_r($this->addresscache);
-		#debug("-------------------------\n");
 		
 		$ping_count = intval($map->get_hint("fping_ping_count"));
 		if($ping_count==0) $ping_count = 5;		

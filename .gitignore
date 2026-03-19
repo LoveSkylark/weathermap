@@ -1,4 +1,17 @@
-configs
-output
-!output/index.php
+# Composer
+vendor/
+
+# Per-installation config override
+editor-config.php
+
+# Map config files (user-created, not committed)
+configs/
+!configs/index.php
+
+# Generated map output (PNG, HTML, data files)
+public/output/
+!public/output/.gitkeep
+
+# Legacy root-level paths (no longer used)
+output/
 weathermap.png

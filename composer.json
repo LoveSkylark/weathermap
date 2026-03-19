@@ -25,5 +25,12 @@
     },
     "require": {
         "php": ">=8.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "App\\Plugins\\Weathermap\\PluginServiceProvider"
+            ]
+        }
     }
 }

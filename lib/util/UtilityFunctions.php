@@ -56,22 +56,9 @@ function wm_debug($string)
 			if(is_array($weathermap_debug_suppress) && in_array(strtolower($function),$weathermap_debug_suppress)) return;
 		}
 
-		// use Cacti's debug log, if we are running from the poller
-		if (function_exists('debug_log_insert') && (!function_exists('show_editor_startpage')))
-		{ cacti_log("DEBUG:$calling_fn " . ($weathermap_map==''?'':$weathermap_map.": ") . rtrim($string), true, "WEATHERMAP"); }
-		else
-		{
-			$stderr=fopen('php://stderr', 'w');
-			fwrite($stderr, "DEBUG:$calling_fn " . ($weathermap_map==''?'':$weathermap_map.": ") . $string);
-			fclose ($stderr);
-
-			if(1==0)
-			{
-				$log=fopen('debug.log', 'a');
-				fwrite($log, "DEBUG:$calling_fn " . ($weathermap_map==''?'':$weathermap_map.": ") . $string);
-				fclose ($log);
-			}
-		}
+		$stderr = fopen('php://stderr', 'w');
+		fwrite($stderr, "DEBUG:$calling_fn " . ($weathermap_map==''?'':$weathermap_map.": ") . $string);
+		fclose($stderr);
 	}
 }
 
@@ -103,15 +90,9 @@ function wm_warn($string,$notice_only=FALSE)
 
 	$message .= ($weathermap_map==''?'':$weathermap_map.": ") . rtrim($string);
 
-	// use Cacti's debug log, if we are running from the poller
-	if (function_exists('cacti_log') && (!function_exists('show_editor_startpage')))
-	{ cacti_log($message, true, "WEATHERMAP"); }
-	else
-	{
-		$stderr=fopen('php://stderr', 'w');
-		fwrite($stderr, $message."\n");
-		fclose ($stderr);
-	}
+	$stderr = fopen('php://stderr', 'w');
+	fwrite($stderr, $message."\n");
+	fclose($stderr);
 }
 
 function js_escape($str, $wrap=TRUE)

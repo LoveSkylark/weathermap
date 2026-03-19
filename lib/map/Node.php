@@ -44,7 +44,6 @@ class Node extends MapItem
 	var $scaletype, $iconscaletype;
 	var $inscalekey,$outscalekey;
 	var $inscaletag, $outscaletag;
-	# var $incolour,$outcolour;
 	var $scalevar, $iconscalevar;
 	var $notestext = array();
 	var $image;
@@ -144,7 +143,6 @@ class Node extends MapItem
 		$icon_h = 0;
 
 		$col = new Colour(-1,-1,-1);
-		# print $col->as_string();
 
 		// if a target is specified, and you haven't forced no background, then the background will
 		// come from the SCALE in USESCALE
@@ -264,13 +262,10 @@ class Node extends MapItem
 					$txt_y = $this->y - ($strheight / 2);
 				}
 
-				# $this->width = $boxwidth;
-				# $this->height = $boxheight;
 			}
 			$map->nodes[$this->name]->width = $boxwidth;
 			$map->nodes[$this->name]->height = $boxheight;
 
-			# print "TEXT at $txt_x , $txt_y\n";
 		}
 
 		// figure out a bounding rectangle for the icon
@@ -397,8 +392,6 @@ class Node extends MapItem
 					$col1 = $this->colours[OUT];
 					$col2 = $this->colours[IN];
 
-					assert('!is_null($col1)');
-					assert('!is_null($col2)');
 
 					imagefilledarc($icon_im, $rx-1, $ry, $size, $size, 270,90, $col1->gdallocate($icon_im), IMG_ARC_PIE);
 					imagefilledarc($icon_im, $rx+1, $ry, $size, $size, 90,270, $col2->gdallocate($icon_im), IMG_ARC_PIE);
@@ -429,7 +422,6 @@ class Node extends MapItem
 				// XXX - needs proper colours
 				if($this->iconfile=='inpie' || $this->iconfile=='outpie')
 				{
-					# list($colpie,$node_iconscalekey,$icontag) = $map->NewColourFromPercent($pc, $this->useiconscale,$this->name);
 
 					if($this->iconfile=='inpie') $segment_angle = (($this->inpercent)/100) * 360;
 					if($this->iconfile=='outpie') $segment_angle = (($this->outpercent)/100) * 360;
@@ -469,7 +461,6 @@ class Node extends MapItem
 					// draw the supplied icon, instead of the labelled box
 
 					$icon_im = imagecreatefromfile($this->iconfile);
-					# $icon_im = imagecreatefrompng($this->iconfile);
 					if(function_exists("imagefilter") && isset($colicon) && $this->get_hint("use_imagefilter")==1)
 					{
 						imagefilter($icon_im, IMG_FILTER_COLORIZE, $colicon->r, $colicon->g, $colicon->b);
@@ -679,7 +670,6 @@ class Node extends MapItem
 			}
 		}
 
-		# $this->image = $node_im;
 		$map->nodes[$this->name]->image = $node_im;
 
 	}
@@ -744,7 +734,6 @@ class Node extends MapItem
 	function CopyFrom(&$source)
 	{
 		wm_debug("Initialising NODE $this->name from $source->name\n");
-		assert('is_object($source)');
 
 		foreach (array_keys($this->inherit_fieldlist)as $fld) {
 			if($fld != 'template') $this->$fld=$source->$fld;
@@ -755,7 +744,6 @@ class Node extends MapItem
 	{
 		$output='';
 
-		# $output .= "# ID ".$this->id." - first seen in ".$this->defined_in."\n";
 
 		// This allows the editor to wholesale-replace a single node's configuration
 		// at write-time - it should include the leading NODE xyz line (to allow for renaming)
@@ -765,14 +753,11 @@ class Node extends MapItem
 		}
 		else
 		{
-			# $defdef = $this->owner->defaultnode;
 			$dd = $this->owner->nodes[$this->template];
 
 			wm_debug("Writing config for NODE $this->name against $this->template\n");
 
-			# $field = 'zorder'; $keyword = 'ZORDER';
 			$basic_params = array(
-					# array('template','TEMPLATE',CONFIG_TYPE_LITERAL),
 					array('label','LABEL',CONFIG_TYPE_LITERAL),
 					array('zorder','ZORDER',CONFIG_TYPE_LITERAL),
 					array('labeloffset','LABELOFFSET',CONFIG_TYPE_LITERAL),
@@ -789,7 +774,6 @@ class Node extends MapItem
 					array('labelfontcolour','LABELFONTCOLOR',CONFIG_TYPE_COLOR)
 				);
 
-			# TEMPLATE must come first. DEFAULT
 			if($this->template != 'DEFAULT' && $this->template != ':: DEFAULT ::')
 			{
 				$output.="\tTEMPLATE " . $this->template . "\n";
@@ -800,7 +784,6 @@ class Node extends MapItem
 				$field = $param[0];
 				$keyword = $param[1];
 
-			#	$comparison=($this->name == 'DEFAULT' ? $this->inherit_fieldlist[$field] : $defdef->$field);
 				if ($this->$field != $dd->$field)
 				{
 					if($param[2] == CONFIG_TYPE_COLOR) $output.="\t$keyword " . render_colour($this->$field) . "\n";

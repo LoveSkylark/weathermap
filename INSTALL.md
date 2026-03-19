@@ -36,6 +36,8 @@ ln -s /opt/librenms/app/Plugins/Weathermap/public /opt/librenms/public/plugins/W
 ```bash
 chown -R librenms:librenms /opt/librenms/app/Plugins/Weathermap
 chmod 775 /opt/librenms/app/Plugins/Weathermap/configs
+chown www-data:www-data /opt/librenms/app/Plugins/Weathermap/public/output
+chmod 775 /opt/librenms/app/Plugins/Weathermap/public/output
 ```
 
 If you are using SELinux:
@@ -44,26 +46,13 @@ If you are using SELinux:
 chcon -R -t httpd_cache_t /opt/librenms/app/Plugins/Weathermap
 ```
 
-## Step 5 — Create the output directory
-
-Map images and HTML output are written here:
-
-```bash
-mkdir -p /opt/librenms/app/Plugins/Weathermap/public/output
-chown www-data:www-data /opt/librenms/app/Plugins/Weathermap/public/output
-```
-
-## Step 6 — Add the poller cron job
-
-Edit `/etc/cron.d/librenms` and add:
-
-```
-*/5 * * * * librenms php /opt/librenms/app/Plugins/Weathermap/bin/map-poller >> /dev/null 2>&1
-```
-
-## Step 7 — Enable the plugin
+## Step 5 — Enable the plugin
 
 In LibreNMS go to **Settings → Plugins** and enable **Weathermap**.
+
+The plugin registers an artisan command `weathermap:poll` via `PluginServiceProvider`, which
+LibreNMS's scheduler picks up automatically and runs every 5 minutes.
+No manual cron entry is required.
 
 ---
 
@@ -80,7 +69,6 @@ The plugin reads the following settings automatically from LibreNMS:
 | SNMP timeout | `snmp.timeout` |
 | SNMP retries | `snmp.retries` |
 
-To override the rrdtool path or other defaults, copy `editor-config.php-dist` to `editor-config.php` and edit it.
 
 ---
 
