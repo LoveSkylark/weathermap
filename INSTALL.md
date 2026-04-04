@@ -13,7 +13,7 @@
 
 ```bash
 cd /opt/librenms/app/Plugins
-git clone https://github.com/librenms-plugins/Weathermap.git Weathermap
+git clone https://github.com/loveskylark/librenms-weathermap.git Weathermap
 ```
 
 ## Step 2 — Install Composer dependencies
