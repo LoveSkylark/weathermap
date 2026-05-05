@@ -9,7 +9,7 @@ class Menu extends MenuEntryHook
 {
 	public function authorize(User $user): bool
 	{
-		return $user->can('global-read');
+		return $user->can('global-read') || $user->isAdmin();
 	}
 
 	public function data(array $settings = []): array
