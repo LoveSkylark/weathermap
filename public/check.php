@@ -78,7 +78,7 @@
     print "\n----------------------------------------------------\nWeathermap Pre-Install Checker\n\n";     
 	print "This script checks for some common problems with your PHP and server\nenvironment that may stop Weathermap or the Editor from working.\n\n";
 	print "NOTE: You should run this script as both a web page AND from the\ncommand-line, as the environment can be different in each.\n";
-        print "\nThis is the PHP version that is responsible for \n* running the map poller (bin/map-poller)\n* the command-line weathermap tool (bin/weathermap)\n\n";
+        print "\nThis is the PHP version that is responsible for \n* running the queue-based map renderer (via Laravel scheduler)\n* the command-line weathermap tool (bin/weathermap)\n\n";
         print "PHP Basics\n----------\n";
         print wordwrap("This is PHP Version $php_version running on \"$php_os\" with a memory_limit of '$mem_allowed'. $mem_warning\n");
         print "\nThe php.ini file was $ini_file\n$extra_ini\n\n";
@@ -111,7 +111,7 @@
     <p>This page checks for some common problems with your PHP and server environment that may stop Weathermap or the Editor from working.</p>
 	<p>NOTE: You should run this script as a web page AND from the command-line, as the environment can be different in each.</p>
       <h2>PHP Basics</h2><p>This is the PHP version that is responsible for</p><ul>
-      <li>The web-based editor</li><li>Running the map poller (bin/map-poller)</li></ul>
+      <li>The web-based editor</li><li>Queue-based map rendering (via Laravel scheduler and queue jobs)</li></ul>
       <p>This is PHP Version <?php echo $php_version ?> running on "<?php echo $php_os ?>" with a memory_limit of '<?php echo $mem_allowed ?>'. <?php echo $mem_warning ?></p>
       <p>The php.ini file was <?php echo $ini_file ?></p>
       <p><?php echo $extra_ini ?></p>
