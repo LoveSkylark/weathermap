@@ -3,8 +3,9 @@
 namespace App\Plugins\Weathermap;
 
 use App\Models\User;
+use App\Plugins\Hooks\MenuEntryHook;
 
-class Menu
+class Menu extends MenuEntryHook
 {
     public function authorize(User $user): bool
     {

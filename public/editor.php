@@ -15,7 +15,7 @@ if(! $ENABLED)
     exit();
 }
 
-require_once dirname(__DIR__) . '/config.php';
+require_once dirname(__DIR__) . '/src/config.php';
 
 if( isset($_COOKIE['wmeditor']))
 {

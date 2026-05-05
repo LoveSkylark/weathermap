@@ -3,8 +3,9 @@
 namespace App\Plugins\Weathermap;
 
 use App\Models\User;
+use App\Plugins\Hooks\PageHook;
 
-class Page
+class Page extends PageHook
 {
     public function authorize(User $user): bool
     {

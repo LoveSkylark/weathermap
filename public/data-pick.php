@@ -2,7 +2,7 @@
 
 // ******************************************
 // sensible defaults
-include dirname(__DIR__) . '/config.php';
+include dirname(__DIR__) . '/src/config.php';
 
 
 $weathermap_config = array (

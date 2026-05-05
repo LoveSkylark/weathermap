@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-include_once dirname(__DIR__) . '/config.php';
+include_once dirname(__DIR__) . '/src/config.php';
 
 require_once $librenms_base . '/vendor/autoload.php';
 

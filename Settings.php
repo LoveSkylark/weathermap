@@ -3,8 +3,9 @@
 namespace App\Plugins\Weathermap;
 
 use App\Models\User;
+use App\Plugins\Hooks\SettingsHook;
 
-class Settings
+class Settings extends SettingsHook
 {
     public function authorize(User $user): bool
     {
