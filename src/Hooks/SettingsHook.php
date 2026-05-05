@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Plugins\Weathermap;
+namespace App\Plugins\Weathermap\Hooks;
 
 use App\Models\User;
 use App\Plugins\Hooks\SettingsHook;
 
-class Settings extends SettingsHook
+class SettingsHook extends SettingsHook
 {
     public function authorize(User $user): bool
     {

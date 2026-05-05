@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Plugins\Weathermap\Console;
+namespace App\Plugins\Weathermap\Console\Commands;
 
 use App\Plugins\Weathermap\Jobs\RenderMapJob;
 use App\Plugins\Weathermap\Services\ConfigPathResolver;

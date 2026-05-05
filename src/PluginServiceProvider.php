@@ -2,7 +2,7 @@
 
 namespace App\Plugins\Weathermap;
 
-use App\Plugins\Weathermap\Console\PollMaps;
+use App\Plugins\Weathermap\Console\Commands\PollMaps;
 use App\Plugins\Weathermap\Http\Controllers\CheckController;
 use App\Plugins\Weathermap\Http\Controllers\EditorPageController;
 use App\Plugins\Weathermap\Http\Controllers\MapConfigController;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Plugins\Weathermap;
+namespace App\Plugins\Weathermap\Hooks;
 
 use App\Models\User;
 use App\Plugins\Hooks\MenuEntryHook;
 
-class Menu extends MenuEntryHook
+class MenuHook extends MenuEntryHook
 {
     public function authorize(User $user): bool
     {
