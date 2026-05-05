@@ -7,6 +7,8 @@ use App\Plugins\Weathermap\Http\Controllers\CheckController;
 use App\Plugins\Weathermap\Http\Controllers\EditorPageController;
 use App\Plugins\Weathermap\Http\Controllers\EditorApiController;
 use App\Plugins\Weathermap\Http\Controllers\DataPickerController;
+use App\Plugins\Weathermap\Services\ConfigPathResolver;
+use App\Plugins\Weathermap\Services\MapRenderService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -15,6 +17,16 @@ class PluginServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Register services
+        $this->app->singleton(ConfigPathResolver::class, function () {
+            return new ConfigPathResolver();
+        });
+
+        $this->app->singleton(MapRenderService::class, function ($app) {
+            return new MapRenderService($app->make(ConfigPathResolver::class));
+        });
+
+        // Register commands
         $this->commands([PollMaps::class]);
     }
 
