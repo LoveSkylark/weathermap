@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * DEPRECATED - This file is deprecated and will be removed in Weathermap v1.0
+ * 
+ * Please use the new Laravel-based editor interface:
+ * 
+ *   NEW:    /plugin/Weathermap/editor
+ *   OLD:    /plugins/Weathermap/editor.php (this file)
+ * 
+ * For migration guide, see: DEPRECATION.md
+ * 
+ * This file remains for backward compatibility with existing bookmarks/links.
+ */
+
 use Weathermap\Map\Node;
 use Weathermap\Map\Link;
 

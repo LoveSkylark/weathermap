@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * DEPRECATED - This file is deprecated and will be removed in Weathermap v1.0
+ * 
+ * Please use the new Laravel-based API:
+ * 
+ *   NEW:    /plugin/Weathermap/api/data-picker
+ *   OLD:    /plugins/Weathermap/data-pick.php (this file)
+ * 
+ * For migration guide, see: DEPRECATION.md
+ * 
+ * This file remains for backward compatibility with existing editor integrations.
+ */
+
 // ******************************************
 // sensible defaults
 include dirname(__DIR__) . '/src/config.php';

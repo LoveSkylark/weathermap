@@ -1,4 +1,18 @@
 <?php
+
+/**
+ * DEPRECATED - This file is deprecated and will be removed in Weathermap v1.0
+ * 
+ * Please use the new Laravel-based check interface:
+ * 
+ *   NEW:    /plugin/Weathermap/check
+ *   OLD:    /plugins/Weathermap/check.php (this file)
+ * 
+ * For migration guide, see: DEPRECATION.md
+ * 
+ * This file remains for backward compatibility with existing bookmarks/links.
+ */
+
       // get some basics...
       $php_version = phpversion();
       $mem_allowed = ini_get("memory_limit");
