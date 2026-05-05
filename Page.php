@@ -34,7 +34,7 @@ class Page extends PageHook
         return [
             'writable'   => $writable,
             'images'     => $images,
-            'editor_url' => asset('plugins/Weathermap/editor.php'),
+            'editor_url' => url('plugin/Weathermap/editor'),
             'readme'     => nl2br(file_exists($plugin_dir . '/INSTALL.md') ? file_get_contents($plugin_dir . '/INSTALL.md') : ''),
         ];
     }

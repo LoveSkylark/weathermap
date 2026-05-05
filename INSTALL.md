@@ -74,7 +74,7 @@ The plugin reads the following settings automatically from LibreNMS:
 
 ## Verify the installation
 
-Navigate to `http://yourserver/plugins/Weathermap/check.php` in a browser, or run from the command line:
+Navigate to `http://yourserver/plugin/Weathermap/check` in a browser, or run from the command line:
 
 ```bash
 php /opt/librenms/app/Plugins/Weathermap/public/check.php
