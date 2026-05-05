@@ -3,10 +3,10 @@
 namespace App\Plugins\Weathermap\Hooks;
 
 use App\Models\User;
-use App\Plugins\Hooks\PageHook;
+use App\Plugins\Hooks\PageHook as BasePageHook;
 use App\Plugins\Weathermap\Services\ConfigPathResolver;
 
-class PageHook extends PageHook
+class PageHook extends BasePageHook
 {
     protected ConfigPathResolver $pathResolver;
 
