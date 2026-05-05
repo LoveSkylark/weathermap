@@ -2,8 +2,18 @@
 
 namespace App\Plugins\Weathermap;
 
-use App\Plugins\Weathermap\Hooks\MenuHook;
+use App\Models\User;
+use App\Plugins\Hooks\MenuEntryHook;
 
-class Menu extends MenuHook
+class Menu extends MenuEntryHook
 {
+	public function authorize(User $user): bool
+	{
+		return $user->can('global-read');
+	}
+
+	public function data(array $settings = []): array
+	{
+		return [];
+	}
 }
